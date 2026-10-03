@@ -1,0 +1,41 @@
+import os
+from pathlib import Path
+
+import streamlit as st
+
+from youtube_ai_agent import generate_video_from_idea
+
+st.set_page_config(page_title="YouTube AI Agent", layout="centered")
+
+st.title("YouTube AI Agent")
+st.caption("Turn a single idea into a short motion-style video using free tools")
+
+idea = st.text_area("Enter your idea or topic", placeholder="Example: AI agents will change content creation in 2026")
+
+if st.button("Generate Video"):
+    if not idea.strip():
+        st.warning("Please enter an idea first.")
+    else:
+        output_dir = Path("output")
+        output_dir.mkdir(exist_ok=True)
+        output_path = output_dir / "final_video.mp4"
+
+        with st.spinner("Researching and generating your video..."):
+            script, final_path = generate_video_from_idea(idea, str(output_path))
+
+        st.success("Video generated successfully!")
+        st.write(f"Title: {script.get('title')}")
+        st.video(str(final_path))
+        st.download_button(
+            label="Download video",
+            data=open(final_path, "rb").read(),
+            file_name=final_path.name,
+            mime="video/mp4",
+        )
+
+st.markdown("""
+### Notes
+- If no API key is set, the app uses a built-in researched-style script.
+- This creates a local MP4 video using free tools.
+- For YouTube upload, use the generated file manually in YouTube Studio.
+""")
